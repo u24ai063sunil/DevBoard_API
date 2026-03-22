@@ -12,7 +12,7 @@ const protect = catchAsync(async (req, res, next) => {
   }
 
   if (!token) {
-    return next(new AppError('You are not logged in. Please log in to get access.', 401));
+    throw new AppError('You are not logged in. Please log in to get access.', 401);
   }
 
   // 2. Verify token (throws if expired or tampered)
@@ -21,12 +21,12 @@ const protect = catchAsync(async (req, res, next) => {
   // 3. Check if user still exists (might have been deleted after token was issued)
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
-    return next(new AppError('The user belonging to this token no longer exists.', 401));
+    throw new AppError('The user belonging to this token no longer exists.', 401);
   }
 
   // 4. Check if user changed password after token was issued
   if (currentUser.changedPasswordAfter(decoded.iat)) {
-    return next(new AppError('User recently changed password. Please log in again.', 401));
+    throw new AppError('User recently changed password. Please log in again.', 401);
   }
 
   // 5. Grant access — attach user to request
@@ -39,7 +39,7 @@ const protect = catchAsync(async (req, res, next) => {
 const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return next(new AppError('You do not have permission to perform this action.', 403));
+      throw new AppError('You do not have permission to perform this action.', 403);
     }
     next();
   };

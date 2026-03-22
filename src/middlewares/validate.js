@@ -13,7 +13,7 @@ const validate = (schema) => (req, res, next) => {
   } catch (err) {
     // Format Zod errors into a readable message
     const message = err.errors.map((e) => `${e.path.slice(1).join('.')}: ${e.message}`).join(', ');
-    return next(new AppError(message, 400));
+    throw new AppError(message, 400);
   }
 };
 

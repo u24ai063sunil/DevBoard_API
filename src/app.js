@@ -7,7 +7,8 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const authRoutes = require('./routes/authRoutes');
 const AppError = require('./utils/AppError');
-
+const projectRoutes = require('./routes/projectRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 const app = express();
 
 // ── Security middleware ──────────────────────────────────────────
@@ -44,7 +45,8 @@ app.get('/health', (req, res) => {
 });
 app.use('/api/auth', authRoutes);
 // (More routes added in later phases)
-
+app.use('/api/projects', projectRoutes);
+app.use('/api/projects/:projectId/tasks', taskRoutes); // nested route
 // ── 404 handler ───────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });

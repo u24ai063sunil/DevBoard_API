@@ -9,7 +9,7 @@ const register = catchAsync(async (req, res, next) => {
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return next(new AppError('Email already in use', 409));
+    throw new AppError('Email already in use', 409);
   }
   const user = await User.create({ name, email, password });
   sendTokens(res, user, 201);
@@ -24,7 +24,7 @@ const login = catchAsync(async (req, res, next) => {
 
   if (!user || !(await user.comparePassword(password))) {
     // Same error message for both cases — don't reveal if email exists
-    return next(new AppError('Invalid email or password', 401));
+    throw new AppError('Invalid email or password', 401);
   }
 
   sendTokens(res, user, 200);
@@ -35,7 +35,7 @@ const refreshToken = catchAsync(async (req, res, next) => {
   const token = req.cookies.refreshToken;
 
   if (!token) {
-    return next(new AppError('No refresh token provided', 401));
+    throw new AppError('No refresh token provided', 401);
   }
 
   // Verify refresh token
@@ -43,7 +43,7 @@ const refreshToken = catchAsync(async (req, res, next) => {
 
   const user = await User.findById(decoded.id);
   if (!user) {
-    return next(new AppError('User not found', 401));
+    throw new AppError('User not found', 401);
   }
 
   // Issue new access token
