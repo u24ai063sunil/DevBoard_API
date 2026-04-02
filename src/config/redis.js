@@ -4,7 +4,7 @@ const redis = new Redis(process.env.REDIS_URL, {
   tls: {
     rejectUnauthorized: false, // required for Upstash TLS
   },
-  maxRetriesPerRequest: 3,
+  maxRetriesPerRequest: null,
   retryStrategy(times) {
     if (times > 3) return null;
     return Math.min(times * 200, 1000);
