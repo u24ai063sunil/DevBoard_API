@@ -10,6 +10,8 @@ const AppError = require('./utils/AppError');
 const projectRoutes = require('./routes/projectRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 const app = express();
 
 // ── Security middleware ──────────────────────────────────────────
@@ -44,6 +46,10 @@ app.use(morgan('dev'));
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customSiteTitle: 'DevBoard API Docs',
+  customCss: '.swagger-ui .topbar { display: none }', // hide default swagger header
+}));
 app.use('/api/auth', authRoutes);
 // (More routes added in later phases)
 app.use('/api/projects', projectRoutes);
