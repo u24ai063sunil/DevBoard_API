@@ -14,3 +14,9 @@ export const updateAvatar = async (file) => {
   })
   return res.data
 }
+
+// Search users by email to add as member
+export const searchUser = async (email) => {
+  const res = await api.get(`/users/search?email=${email}`)
+  return res.data
+}

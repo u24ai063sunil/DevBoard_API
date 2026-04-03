@@ -12,6 +12,8 @@ const taskRoutes = require('./routes/taskRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
+const userRoutes = require('./routes/userRoutes')
+
 const app = express();
 
 // ── Security middleware ──────────────────────────────────────────
@@ -57,6 +59,7 @@ app.use('/api/auth', authRoutes);
 // (More routes added in later phases)
 app.use('/api/projects', projectRoutes);
 app.use('/api/projects/:projectId/tasks', taskRoutes); // nested route
+app.use('/api/users', userRoutes)
 // ── 404 handler ───────────────────────────────────────────────────
 app.use('/api', uploadRoutes);
 app.use((req, res) => {

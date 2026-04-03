@@ -5,6 +5,8 @@ import TaskCard from '../components/TaskCard'
 import CreateTaskModal from '../components/CreateTaskModal'
 import TaskFilters from '../components/TaskFilters'
 import { useProject, useTasks } from '../hooks/useTasks'
+import MembersModal from '../components/MembersModal'
+import { useQueryClient } from '@tanstack/react-query'
 
 const statusColumns = ['todo', 'in-progress', 'in-review', 'done']
 const columnLabels  = { 'todo': 'Todo', 'in-progress': 'In Progress', 'in-review': 'In Review', 'done': 'Done' }
@@ -24,7 +26,12 @@ const ProjectDetail = () => {
 
   const project  = projectData?.data
   const allTasks = useMemo(() => tasksData?.data || [], [tasksData])
+  const queryClient  = useQueryClient()
+  const [showMembers, setShowMembers] = useState(false)
 
+  const handleMembersUpdate = () => {
+    queryClient.invalidateQueries({ queryKey: ['project', id] })
+  }
   // Client-side filtering (instant, no API call)
   const filteredTasks = useMemo(() => {
     return allTasks.filter((task) => {
@@ -98,11 +105,18 @@ const ProjectDetail = () => {
             </div>
           </div>
           <button
+            onClick={() => setShowMembers(true)}
+            className="bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium px-4 py-2 rounded-lg transition"
+          >
+            Team
+          </button>
+          <button
             onClick={() => setShowModal(true)}
             className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
           >
             + Add Task
           </button>
+          
         </div>
 
         {/* Progress bar */}
@@ -142,6 +156,13 @@ const ProjectDetail = () => {
             >
               Add task
             </button>
+            {showMembers && project && (
+              <MembersModal
+                project={project}
+                onClose={() => setShowMembers(false)}
+                onUpdate={handleMembersUpdate}
+              />
+            )}
           </div>
         )}
 

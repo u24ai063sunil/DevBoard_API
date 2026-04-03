@@ -7,6 +7,7 @@ const {
 const { protect, restrictTo } = require('../middlewares/authMiddleware');
 const validate = require('../middlewares/validate');
 const { createProjectSchema, updateProjectSchema } = require('../validators/projectValidators');
+const { removeMember } = require('../controllers/projectController')
 
 router.use(protect);
 
@@ -179,5 +180,5 @@ router.route('/:id')
  *         description: User already a member
  */
 router.post('/:id/members', addMember);
-
+router.delete('/:id/members/:userId', removeMember)
 module.exports = router;

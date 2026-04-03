@@ -151,12 +151,33 @@ const addMember = catchAsync(async (req, res, next) => {
 
   res.status(200).json({ success: true, data: project });
 });
+// DELETE /api/projects/:id/members/:userId
+const removeMember = catchAsync(async (req, res, next) => {
+  const project = await Project.findById(req.params.id)
+  if (!project) return next(new AppError('Project not found', 404))
+
+  // Only owner can remove members
+  if (project.owner.toString() !== req.user.id) {
+    return next(new AppError('Only the owner can remove members', 403))
+  }
+
+  // Cannot remove owner
+  if (req.params.userId === project.owner.toString()) {
+    return next(new AppError('Cannot remove the project owner', 400))
+  }
+
+  // $pull removes matching element from array
+  project.members = project.members.filter(
+    (m) => m.user.toString() !== req.params.userId
+  )
+  await project.save()
+
+  await deletePattern(`projects:${req.user.id}:*`)
+
+  res.status(200).json({ success: true, data: project })
+})
 
 module.exports = {
-  getAllProjects,
-  getProject,
-  createProject,
-  updateProject,
-  deleteProject,
-  addMember,
-};
+  getAllProjects, getProject, createProject,
+  updateProject, deleteProject, addMember, removeMember,
+}
