@@ -1,19 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../api/axios'
 
-// Fetch all tasks for a project
-export const useTasks = (projectId) => {
+export const useTasks = (projectId, params = {}) => {
   return useQuery({
-    queryKey: ['tasks', projectId],
+    queryKey: ['tasks', projectId, params],
     queryFn: async () => {
-      const res = await api.get(`/projects/${projectId}/tasks`)
+      const res = await api.get(`/projects/${projectId}/tasks`, { params })
       return res.data
     },
-    enabled: !!projectId, // only run if projectId exists
+    enabled: !!projectId,
   })
 }
 
-// Fetch single project
 export const useProject = (projectId) => {
   return useQuery({
     queryKey: ['project', projectId],
@@ -25,7 +23,6 @@ export const useProject = (projectId) => {
   })
 }
 
-// Create task
 export const useCreateTask = (projectId) => {
   const queryClient = useQueryClient()
   return useMutation({
@@ -39,7 +36,6 @@ export const useCreateTask = (projectId) => {
   })
 }
 
-// Update task
 export const useUpdateTask = (projectId) => {
   const queryClient = useQueryClient()
   return useMutation({
@@ -53,7 +49,6 @@ export const useUpdateTask = (projectId) => {
   })
 }
 
-// Delete task
 export const useDeleteTask = (projectId) => {
   const queryClient = useQueryClient()
   return useMutation({
