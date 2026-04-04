@@ -30,9 +30,6 @@ const ProjectDetail = () => {
   const queryClient  = useQueryClient()
   const [showMembers, setShowMembers] = useState(false)
 
-  const handleMembersUpdate = () => {
-    queryClient.invalidateQueries({ queryKey: ['project', id] })
-  }
   // Client-side filtering (instant, no API call)
   const filteredTasks = useMemo(() => {
     return allTasks.filter((task) => {
@@ -61,7 +58,8 @@ const ProjectDetail = () => {
   ).length
   if (projectLoading) {
     return (
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen transition-colors duration-200"
+     style={{ backgroundColor: 'var(--bg-primary)' }}>
         <Navbar />
         <div className="max-w-6xl mx-auto px-6 py-8 animate-pulse space-y-4">
           <div className="h-8 bg-gray-800 rounded w-1/3"/>

@@ -1,5 +1,6 @@
 import { useUpdateTask, useDeleteTask } from '../hooks/useTasks'
 import { getDueDateStatus, formatDate } from '../utils/dateUtils'
+import TaskAttachments from './TaskAttachments'
 
 const statusOptions = ['todo', 'in-progress', 'in-review', 'done']
 
@@ -25,9 +26,8 @@ const dueDateColors = {
 }
 
 const TaskCard = ({ task, projectId }) => {
-  const updateTask = useUpdateTask(projectId)
-  const deleteTask = useDeleteTask(projectId)
-
+  const updateTask    = useUpdateTask(projectId)
+  const deleteTask    = useDeleteTask(projectId)
   const dueDateStatus = getDueDateStatus(task.dueDate, task.status)
 
   const handleStatusChange = async (e) => {
@@ -95,13 +95,6 @@ const TaskCard = ({ task, projectId }) => {
         </div>
       )}
 
-      {/* Due date (normal display) */}
-      {task.dueDate && !dueDateStatus && task.status === 'done' && (
-        <p className="text-gray-500 text-xs mb-3">
-          Due {formatDate(task.dueDate)}
-        </p>
-      )}
-
       {/* Status dropdown */}
       <select
         value={task.status}
@@ -122,6 +115,12 @@ const TaskCard = ({ task, projectId }) => {
           Done {formatDate(task.completedAt)}
         </p>
       )}
+
+      {/* Attachments — shows upload button + existing files */}
+      <div className="border-t border-gray-800 mt-3 pt-3">
+        <TaskAttachments task={task} projectId={projectId} />
+      </div>
+
     </div>
   )
 }
