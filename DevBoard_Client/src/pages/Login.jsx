@@ -75,6 +75,9 @@ const Login = () => {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Password
               </label>
+              <Link to="/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300">
+                Forgot password?
+              </Link>
               <input
                 type="password"
                 name="password"

@@ -40,5 +40,38 @@ const sendTaskAssignedEmail = async ({ to, assigneeName, taskTitle, projectName 
     `,
   });
 };
+const sendPasswordResetEmail = async ({ to, name, resetToken }) => {
+  const resetUrl = `http://localhost:5173/reset-password?token=${resetToken}`
+  const transporter = createTransporter()
 
-module.exports = { sendWelcomeEmail, sendTaskAssignedEmail };
+  await transporter.sendMail({
+    from: `"DevBoard" <${process.env.EMAIL_FROM}>`,
+    to,
+    subject: 'Reset your DevBoard password',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: #4f46e5; padding: 20px; border-radius: 12px 12px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0;">DevBoard</h1>
+        </div>
+        <div style="background: #f8fafc; padding: 30px; border-radius: 0 0 12px 12px;">
+          <h2 style="color: #1e293b;">Hi ${name},</h2>
+          <p style="color: #475569; line-height: 1.6;">
+            You requested to reset your password.
+            Click the button below — this link expires in <strong>15 minutes</strong>.
+          </p>
+          <a href="${resetUrl}"
+            style="display: inline-block; background: #4f46e5; color: white;
+            padding: 12px 24px; border-radius: 8px; text-decoration: none;
+            font-weight: bold; margin-top: 16px;">
+            Reset Password
+          </a>
+          <p style="color: #94a3b8; font-size: 12px; margin-top: 24px;">
+            If you didn't request this, ignore this email. Your password won't change.
+          </p>
+        </div>
+      </div>
+    `,
+  })
+}
+
+module.exports = { sendWelcomeEmail, sendTaskAssignedEmail, sendPasswordResetEmail }

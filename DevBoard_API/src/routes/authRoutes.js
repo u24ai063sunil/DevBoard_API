@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const { register, login, refreshToken, logout, getMe, changePassword } = require('../controllers/authController');
+const {
+  register, login, refreshToken, logout,
+  getMe, changePassword, forgotPassword, resetPassword,
+} = require('../controllers/authController')
 const { protect } = require('../middlewares/authMiddleware');
 const validate = require('../middlewares/validate');
 const { registerSchema, loginSchema } = require('../validators/authValidators');
@@ -137,4 +140,6 @@ router.post('/logout', logout);
  */
 router.get('/me', protect, getMe);
 router.patch('/change-password', protect, changePassword)
+router.post('/forgot-password', forgotPassword)
+router.post('/reset-password',  resetPassword)
 module.exports = router;

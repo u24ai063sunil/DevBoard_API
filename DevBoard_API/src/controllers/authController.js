@@ -3,7 +3,8 @@ const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 const { sendTokens, verifyToken, generateAccessToken } = require('../utils/tokenUtils');
 const { addWelcomeEmailJob } = require('../jobs/emailQueue');
-
+const crypto = require('crypto')
+const { addPasswordResetEmailJob } = require('../jobs/emailQueue')
 // POST /api/auth/register
 // const register = catchAsync(async (req, res, next) => {
 //   const { name, email, password } = req.body;
@@ -112,6 +113,88 @@ const changePassword = catchAsync(async (req, res, next) => {
     message: 'Password changed successfully',
   })
 })
+// POST /api/auth/forgot-password
+const forgotPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body
 
+  if (!email) return next(new AppError('Please provide your email', 400))
+
+  const user = await User.findOne({ email })
+
+  // Always return success — don't reveal if email exists
+  if (!user) {
+    return res.status(200).json({
+      success: true,
+      message: 'If that email exists, a reset link has been sent',
+    })
+  }
+
+  // Generate token + save to DB
+  const resetToken = user.createPasswordResetToken()
+  await user.save({ validateBeforeSave: false })
+
+  // Queue email
+  try {
+    await addPasswordResetEmailJob({
+      to:         user.email,
+      name:       user.name,
+      resetToken,
+    })
+  } catch (err) {
+    // Clear token if email fails
+    user.passwordResetToken   = undefined
+    user.passwordResetExpires = undefined
+    await user.save({ validateBeforeSave: false })
+    return next(new AppError('Error sending email. Try again later.', 500))
+  }
+
+  res.status(200).json({
+    success: true,
+    message: 'If that email exists, a reset link has been sent',
+  })
+})
+
+// POST /api/auth/reset-password
+const resetPassword = catchAsync(async (req, res, next) => {
+  const { token, newPassword } = req.body
+
+  if (!token || !newPassword) {
+    return next(new AppError('Token and new password are required', 400))
+  }
+
+  // Hash the token from URL to compare with DB
+  const hashedToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex')
+
+  // Find user with valid non-expired token
+  const user = await User.findOne({
+    passwordResetToken:   hashedToken,
+    passwordResetExpires: { $gt: Date.now() }, // not expired
+  })
+
+  if (!user) {
+    return next(new AppError('Token is invalid or has expired', 400))
+  }
+
+  // Validate password strength
+  if (newPassword.length < 8) {
+    return next(new AppError('Password must be at least 8 characters', 400))
+  }
+
+  // Set new password — pre-save hook hashes it
+  user.password             = newPassword
+  user.passwordResetToken   = undefined
+  user.passwordResetExpires = undefined
+  user.passwordChangedAt    = new Date()
+  await user.save()
+
+  // Log them in immediately with new token
+  sendTokens(res, user, 200)
+})
 // Add to exports
-module.exports = { register, login, refreshToken, logout, getMe, changePassword }
+module.exports = {
+  register, login, refreshToken, logout,
+  getMe, changePassword, forgotPassword, resetPassword,
+}

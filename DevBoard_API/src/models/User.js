@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto')
 
 const userSchema = new mongoose.Schema(
   {
@@ -45,13 +46,25 @@ const userSchema = new mongoose.Schema(
     timestamps: true, // auto-adds createdAt and updatedAt fields
   }
 );
+// Add this instance method before the model creation
+userSchema.methods.createPasswordResetToken = function () {
+  // Generate random token
+  const resetToken = crypto.randomBytes(32).toString('hex')
 
+  // Hash it before storing in DB — never store plain tokens
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex')
+
+  // Expires in 15 minutes
+  this.passwordResetExpires = Date.now() + 15 * 60 * 1000
+
+  // Return unhashed token — this goes in the email link
+  return resetToken
+}
 // ── Pre-save hook: hash password before saving ──────────────────────
 userSchema.pre('save', async function () {
-  console.log('PRE-SAVE HOOK FIRED');
-  console.log('isModified:', this.isModified('password'));
-  console.log('this context:', typeof this);
-  
   if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 12);
 });

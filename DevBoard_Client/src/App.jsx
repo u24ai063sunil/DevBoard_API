@@ -5,6 +5,8 @@ import Dashboard from './pages/Dashboard'
 import ProjectDetail from './pages/ProjectDetail'
 import ProtectedRoute from './components/ProtectedRoute'
 import Profile from './pages/Profile'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword  from './pages/ResetPassword'
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         }/>
         <Route path="/"  element={<Navigate to="/dashboard" replace />} />
         <Route path="*"  element={<Navigate to="/login" replace />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password"  element={<ResetPassword />} />
       </Routes>
     </BrowserRouter>
   )

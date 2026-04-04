@@ -23,5 +23,13 @@ const addWelcomeEmailJob = async (userData) => {
 const addTaskAssignedEmailJob = async (taskData) => {
   await emailQueue.add('task-assigned-email', taskData);
 };
+const addPasswordResetEmailJob = async (resetData) => {
+  await emailQueue.add('password-reset-email', resetData)
+}
 
-module.exports = { emailQueue, addWelcomeEmailJob, addTaskAssignedEmailJob };
+module.exports = {
+  emailQueue,
+  addWelcomeEmailJob,
+  addTaskAssignedEmailJob,
+  addPasswordResetEmailJob,
+}

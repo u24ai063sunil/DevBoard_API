@@ -1,6 +1,6 @@
 const { Worker } = require('bullmq');
 const redis = require('../config/redis');
-const { sendWelcomeEmail, sendTaskAssignedEmail } = require('../utils/email');
+const { sendWelcomeEmail, sendTaskAssignedEmail, sendPasswordResetEmail } = require('../utils/email')
 const logger = require('../utils/logger');
 
 const emailWorker = new Worker(
@@ -17,6 +17,10 @@ const emailWorker = new Worker(
         await sendTaskAssignedEmail(job.data);
         break;
 
+      case 'password-reset-email':
+        await sendPasswordResetEmail(job.data)
+        break;
+        
       default:
         throw new Error(`Unknown job type: ${job.name}`);
     }
