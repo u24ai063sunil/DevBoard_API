@@ -17,7 +17,8 @@ const Dashboard = () => {
     : projects.filter((p) => p.status === filter)
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen transition-colors duration-200"
+     style={{ backgroundColor: 'var(--bg-primary)' }}>
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-6 py-8">

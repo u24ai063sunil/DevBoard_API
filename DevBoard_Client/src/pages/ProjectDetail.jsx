@@ -73,7 +73,8 @@ const ProjectDetail = () => {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gray-950">
+      <div className="min-h-screen transition-colors duration-200"
+     style={{ backgroundColor: 'var(--bg-primary)' }}>
         <Navbar />
         <div className="text-center py-16">
           <p className="text-red-400 mb-4">Project not found</p>
@@ -86,7 +87,8 @@ const ProjectDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="min-h-screen transition-colors duration-200"
+     style={{ backgroundColor: 'var(--bg-primary)' }}>
       <Navbar />
       <main className="max-w-7xl mx-auto px-6 py-8">
 

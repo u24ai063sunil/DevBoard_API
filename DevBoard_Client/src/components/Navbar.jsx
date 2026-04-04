@@ -1,5 +1,6 @@
 import { useNavigate, Link } from 'react-router-dom'
 import useAuthStore from '../store/authStore'
+import ThemeToggle from './ThemeToggle'
 
 const Navbar = () => {
   const { user, logout } = useAuthStore()
@@ -11,7 +12,7 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="bg-gray-900 border-b border-gray-800 px-6 py-4">
+    <nav className="bg-gray-900 border-b border-gray-800 px-6 py-4 transition-colors duration-200">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
 
         {/* Logo */}
@@ -25,19 +26,17 @@ const Navbar = () => {
         {/* Right side */}
         <div className="flex items-center gap-3">
 
+          {/* Theme toggle */}
+          <ThemeToggle />
+
           {/* Profile link */}
           <Link
             to="/profile"
             className="flex items-center gap-2 hover:opacity-80 transition"
           >
-            {/* Avatar */}
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-indigo-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-indigo-500 flex items-center justify-center shrink-0">
               {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt="avatar"
-                  className="w-full h-full object-cover"
-                />
+                <img src={user.avatar} alt="avatar" className="w-full h-full object-cover"/>
               ) : (
                 <span className="text-white text-sm font-medium">
                   {user?.name?.charAt(0).toUpperCase()}

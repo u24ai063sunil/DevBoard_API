@@ -1,1 +1,97 @@
 @import "tailwindcss";
+
+:root {
+  --bg-primary:    #0f172a;
+  --bg-secondary:  #1e293b;
+  --bg-card:       #1e293b;
+  --bg-input:      #0f172a;
+  --text-primary:  #f8fafc;
+  --text-secondary:#94a3b8;
+  --border-color:  #334155;
+  --accent:        #6366f1;
+}
+
+.light {
+  --bg-primary:    #f1f5f9;
+  --bg-secondary:  #ffffff;
+  --bg-card:       #ffffff;
+  --bg-input:      #f8fafc;
+  --text-primary:  #0f172a;
+  --text-secondary:#64748b;
+  --border-color:  #e2e8f0;
+  --accent:        #4f46e5;
+}
+
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Override Tailwind hardcoded classes in light mode */
+.light .bg-gray-950 { background-color: var(--bg-primary) !important; }
+.light .bg-gray-900 { background-color: var(--bg-secondary) !important; }
+.light .bg-gray-800 { background-color: #e2e8f0 !important; }
+.light .bg-gray-700 { background-color: #cbd5e1 !important; }
+.light .border-gray-800 { border-color: #e2e8f0 !important; }
+.light .border-gray-700 { border-color: #cbd5e1 !important; }
+.light .text-white  { color: #0f172a !important; }
+.light .text-gray-300 { color: #475569 !important; }
+.light .text-gray-400 { color: #64748b !important; }
+.light .text-gray-500 { color: #94a3b8 !important; }
+.light .text-gray-600 { color: #94a3b8 !important; }
+.light .placeholder-gray-500::placeholder { color: #94a3b8 !important; }
+.light nav { background-color: #ffffff !important; border-color: #e2e8f0 !important; }
+/* Fix button and accent colors in light mode */
+.light .bg-indigo-600 { background-color: #4f46e5 !important; }
+.light .bg-indigo-500 { background-color: #6366f1 !important; }
+.light .hover\:bg-indigo-500:hover { background-color: #6366f1 !important; }
+.light .bg-gray-800.hover\:bg-gray-700 { background-color: #e2e8f0 !important; }
+
+/* Filter tabs in light mode */
+.light button.bg-gray-800 { 
+  background-color: #e2e8f0 !important; 
+  color: #475569 !important; 
+}
+.light button.bg-gray-800:hover { 
+  background-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+/* Active filter tab stays indigo */
+.light button.bg-indigo-600 { 
+  background-color: #4f46e5 !important; 
+  color: #ffffff !important; 
+}
+
+/* Project cards in light mode */
+.light .bg-gray-900.border { 
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+}
+.light .bg-gray-900.border:hover { 
+  border-color: #a5b4fc !important;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.12) !important;
+}
+
+/* New Project button */
+.light .bg-indigo-600.hover\:bg-indigo-500 {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+/* Logout button */
+.light .bg-gray-800.hover\:bg-gray-700.text-gray-400 {
+  background-color: #f1f5f9 !important;
+  color: #64748b !important;
+  border: 1px solid #e2e8f0;
+}
+
+/* Avatar circle */
+.light .bg-indigo-500 {
+  background-color: #4f46e5 !important;
+}

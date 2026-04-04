@@ -58,7 +58,7 @@ const TaskCard = ({ task, projectId }) => {
         <button
           onClick={handleDelete}
           disabled={deleteTask.isPending}
-          className="text-gray-600 hover:text-red-400 transition text-lg leading-none flex-shrink-0"
+          className="text-gray-600 hover:text-red-400 transition text-lg leading-none shrink-0"
         >
           ×
         </button>

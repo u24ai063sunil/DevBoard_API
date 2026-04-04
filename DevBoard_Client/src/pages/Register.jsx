@@ -44,7 +44,8 @@ const Register = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 transition-colors duration-200"
+     style={{ backgroundColor: 'var(--bg-primary)' }}>
       <div className="w-full max-w-md">
 
         {/* Title */}
@@ -54,7 +55,8 @@ const Register = () => {
         </div>
 
         {/* Card */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8">
+        <div className="rounded-2xl p-8 border transition-colors duration-200"
+     style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)' }}>
 
           {/* Error */}
           {error && (
