@@ -32,7 +32,7 @@ const notifyProject = (projectId, type, data) => {
     const io = getIO()
     io.to(`project:${projectId}`).emit('project:update', {
       type,
-      data,
+      data: { ...data, projectId }, // always include projectId
       timestamp: new Date().toISOString(),
     })
   } catch (err) {

@@ -9,8 +9,7 @@ import MembersModal from '../components/MembersModal'
 import { useQueryClient } from '@tanstack/react-query'
 import { getDueDateStatus } from '../utils/dateUtils'
 import { useEffect } from 'react'
-import { joinProjectRoom, leaveProjectRoom } from '../socket/useSocket'
-
+import { joinProjectRoom, leaveProjectRoom, getSocket } from '../socket/useSocket'
 const statusColumns = ['todo', 'in-progress', 'in-review', 'done']
 const columnLabels  = { 'todo': 'Todo', 'in-progress': 'In Progress', 'in-review': 'In Review', 'done': 'Done' }
 const columnColors  = { 'todo': 'border-gray-700', 'in-progress': 'border-blue-500/30', 'in-review': 'border-yellow-500/30', 'done': 'border-green-500/30' }
@@ -27,6 +26,33 @@ const ProjectDetail = () => {
 
     return () => {
       if (id) leaveProjectRoom(id)
+    }
+  }, [id])
+
+  const [liveConnected, setLiveConnected] = useState(false)
+  const [viewerCount, setViewerCount] = useState(1)
+
+  useEffect(() => {
+    if (!id) return
+
+    joinProjectRoom(id)
+
+    // Check if socket connected
+    const socket = getSocket()
+    if (socket?.connected) setLiveConnected(true)
+
+    const handleConnect    = () => setLiveConnected(true)
+    const handleDisconnect = () => setLiveConnected(false)
+
+    socket?.on('connect',    handleConnect)
+    socket?.on('disconnect', handleDisconnect)
+    socket?.on('room:members', ({ projectId: pid, count }) => {
+      if (pid === id) setViewerCount(count)
+    })
+    return () => {
+      leaveProjectRoom(id)
+      socket?.off('connect',    handleConnect)
+      socket?.off('disconnect', handleDisconnect)
     }
   }, [id])
   const navigate = useNavigate()
@@ -118,6 +144,22 @@ const ProjectDetail = () => {
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white mb-1">{project.name}</h1>
+            {/* Live indicator */}
+            <div className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full ${
+              liveConnected
+                ? 'bg-green-500/10 text-green-400'
+                : 'bg-gray-500/10 text-gray-400'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                liveConnected ? 'bg-green-400 animate-pulse' : 'bg-gray-500'
+              }`}/>
+              {liveConnected ? 'Live' : 'Offline'}
+            </div>
+            {viewerCount > 1 && (
+              <span className="text-xs text-gray-500">
+                {viewerCount} viewing
+              </span>
+            )}
             {project.description && (
               <p className="text-gray-400 text-sm">{project.description}</p>
             )}

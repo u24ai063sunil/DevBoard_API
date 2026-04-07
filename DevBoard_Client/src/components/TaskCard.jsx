@@ -1,7 +1,7 @@
 import { useUpdateTask, useDeleteTask } from '../hooks/useTasks'
 import { getDueDateStatus, formatDate } from '../utils/dateUtils'
 import TaskAttachments from './TaskAttachments'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import EditTaskModal from './EditTaskModal'
 const statusOptions = ['todo', 'in-progress', 'in-review', 'done']
 
@@ -30,7 +30,17 @@ const TaskCard = ({ task, projectId }) => {
   const updateTask    = useUpdateTask(projectId)
   const deleteTask    = useDeleteTask(projectId)
   const dueDateStatus = getDueDateStatus(task.dueDate, task.status)
+  const [justUpdated, setJustUpdated] = useState(false)
+  const prevStatusRef = useRef(task.status)
 
+  useEffect(() => {
+    if (prevStatusRef.current !== task.status) {
+      setJustUpdated(true)
+      const timer = setTimeout(() => setJustUpdated(false), 1500)
+      prevStatusRef.current = task.status
+      return () => clearTimeout(timer)
+    }
+  }, [task.status])
   const handleStatusChange = async (e) => {
     await updateTask.mutateAsync({ id: task._id, data: { status: e.target.value } })
   }
@@ -43,11 +53,18 @@ const TaskCard = ({ task, projectId }) => {
   }
 
   return (
-    <div className={`bg-gray-900 border rounded-xl p-4 transition ${
-      dueDateStatus?.type === 'overdue'
-        ? 'border-red-500/30 hover:border-red-500/50'
-        : 'border-gray-800 hover:border-gray-700'
-    }`}>
+    // <div className={`bg-gray-900 border rounded-xl p-4 transition ${
+    //   dueDateStatus?.type === 'overdue'
+    //     ? 'border-red-500/30 hover:border-red-500/50'
+    //     : 'border-gray-800 hover:border-gray-700'
+    // }`}>
+    <div className={`border rounded-xl p-4 transition-all duration-300 ${
+        justUpdated
+          ? 'bg-indigo-500/10 border-indigo-500/30'
+          : dueDateStatus?.type === 'overdue'
+            ? 'bg-gray-900 border-red-500/30 hover:border-red-500/50'
+            : 'bg-gray-900 border-gray-800 hover:border-gray-700'
+      }`}>
 
       {/* Header */}
       <div className="flex justify-between items-start gap-2 mb-2">

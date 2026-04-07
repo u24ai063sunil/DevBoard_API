@@ -36,24 +36,37 @@ const initSocket = (httpServer) => {
   io.on('connection', (socket) => {
     logger.info(`Socket connected: ${socket.userId}`)
 
-    // Join personal room — for targeted notifications
     socket.join(`user:${socket.userId}`)
 
-    // Join project rooms when user opens a project
     socket.on('join:project', (projectId) => {
       socket.join(`project:${projectId}`)
-      logger.info(`User ${socket.userId} joined project ${projectId}`)
+
+      // Broadcast to project room that someone joined
+      const room    = io.sockets.adapter.rooms.get(`project:${projectId}`)
+      const count   = room ? room.size : 1
+
+      io.to(`project:${projectId}`).emit('room:members', {
+        projectId,
+        count,
+      })
     })
 
-    // Leave project room
     socket.on('leave:project', (projectId) => {
       socket.leave(`project:${projectId}`)
+
+      const room  = io.sockets.adapter.rooms.get(`project:${projectId}`)
+      const count = room ? room.size : 0
+
+      io.to(`project:${projectId}`).emit('room:members', {
+        projectId,
+        count,
+      })
     })
 
-    socket.on('disconnect', () => {
-      logger.info(`Socket disconnected: ${socket.userId}`)
-    })
+  socket.on('disconnect', () => {
+    logger.info(`Socket disconnected: ${socket.userId}`)
   })
+})
 
   return io
 }
