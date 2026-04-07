@@ -6,6 +6,7 @@ const catchAsync = require('../utils/catchAsync')
 const ApiFeatures = require('../utils/ApiFeatures')
 const { addTaskAssignedEmailJob } = require('../jobs/emailQueue')
 const logger  = require('../utils/logger')
+const { notifyUser, notifyProject, NOTIFICATION_TYPES } = require('../utils/notify')
 
 // Helper: check if user has access to the project
 const checkProjectAccess = async (projectId, userId) => {
@@ -76,13 +77,24 @@ const createTask = catchAsync(async (req, res, next) => {
     createdBy: req.user.id,
   })
 
-  // Send email if task is assigned to someone else on creation
+  // Notify assignee in real-time
   if (task.assignee && task.assignee.toString() !== req.user.id) {
     try {
       const assignee = await User.findById(task.assignee).select('name email')
       const project  = await Project.findById(req.params.projectId)
 
       if (assignee) {
+        // Real-time notification
+        notifyUser(task.assignee.toString(), NOTIFICATION_TYPES.TASK_ASSIGNED, {
+          taskId:      task._id,
+          taskTitle:   task.title,
+          projectId:   req.params.projectId,
+          projectName: project.name,
+          assignedBy:  req.user.name || 'Someone',
+          message:     `You were assigned "${task.title}" in ${project.name}`,
+        })
+
+        // Email notification
         await addTaskAssignedEmailJob({
           to:           assignee.email,
           assigneeName: assignee.name,
@@ -91,8 +103,17 @@ const createTask = catchAsync(async (req, res, next) => {
         })
       }
     } catch (err) {
+      logger.error(`Notification error: ${err.message}`)
     }
   }
+
+  // Notify all project members about new task
+  notifyProject(req.params.projectId, NOTIFICATION_TYPES.TASK_UPDATED, {
+    action:    'created',
+    taskId:    task._id,
+    taskTitle: task.title,
+    by:        req.user.name || 'A team member',
+  })
 
   res.status(201).json({ success: true, data: task })
 })
@@ -114,6 +135,7 @@ const updateTask = catchAsync(async (req, res, next) => {
 
   if (!task) return next(new AppError('Task not found', 404))
 
+  // Notify assignee if changed
   const assigneeChanged = req.body.assignee &&
     req.body.assignee !== oldTask.assignee?.toString()
 
@@ -121,9 +143,19 @@ const updateTask = catchAsync(async (req, res, next) => {
     const isAssigningToSelf = task.assignee._id.toString() === req.user.id
 
     if (!isAssigningToSelf) {
-      try {
-        const project = await Project.findById(req.params.projectId)
+      const project = await Project.findById(req.params.projectId)
 
+      // Real-time
+      notifyUser(task.assignee._id.toString(), NOTIFICATION_TYPES.TASK_ASSIGNED, {
+        taskId:      task._id,
+        taskTitle:   task.title,
+        projectId:   req.params.projectId,
+        projectName: project.name,
+        message:     `You were assigned "${task.title}" in ${project.name}`,
+      })
+
+      // Email
+      try {
         await addTaskAssignedEmailJob({
           to:           task.assignee.email,
           assigneeName: task.assignee.name,
@@ -131,9 +163,27 @@ const updateTask = catchAsync(async (req, res, next) => {
           projectName:  project.name,
         })
       } catch (err) {
+        logger.error(`Email queue error: ${err.message}`)
       }
     }
   }
+
+  // Notify if task marked as done
+  if (req.body.status === 'done' && oldTask.status !== 'done') {
+    notifyProject(req.params.projectId, NOTIFICATION_TYPES.TASK_COMPLETED, {
+      taskId:    task._id,
+      taskTitle: task.title,
+      by:        req.user.name || 'A team member',
+      message:   `"${task.title}" was marked as done`,
+    })
+  }
+
+  // Notify project room of any update
+  notifyProject(req.params.projectId, NOTIFICATION_TYPES.TASK_UPDATED, {
+    action:    'updated',
+    taskId:    task._id,
+    taskTitle: task.title,
+  })
 
   res.status(200).json({ success: true, data: task })
 })

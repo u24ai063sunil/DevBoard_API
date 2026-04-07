@@ -8,6 +8,8 @@ import { useProject, useTasks } from '../hooks/useTasks'
 import MembersModal from '../components/MembersModal'
 import { useQueryClient } from '@tanstack/react-query'
 import { getDueDateStatus } from '../utils/dateUtils'
+import { useEffect } from 'react'
+import { joinProjectRoom, leaveProjectRoom } from '../socket/useSocket'
 
 const statusColumns = ['todo', 'in-progress', 'in-review', 'done']
 const columnLabels  = { 'todo': 'Todo', 'in-progress': 'In Progress', 'in-review': 'In Review', 'done': 'Done' }
@@ -15,6 +17,18 @@ const columnColors  = { 'todo': 'border-gray-700', 'in-progress': 'border-blue-5
 
 const ProjectDetail = () => {
   const { id } = useParams()
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    if (id) {
+      joinProjectRoom(id)
+      console.log('Joined project room:', id)
+    }
+
+    return () => {
+      if (id) leaveProjectRoom(id)
+    }
+  }, [id])
   const navigate = useNavigate()
 
   const [showModal, setShowModal] = useState(false)
@@ -27,7 +41,7 @@ const ProjectDetail = () => {
 
   const project  = projectData?.data
   const allTasks = useMemo(() => tasksData?.data || [], [tasksData])
-  const queryClient  = useQueryClient()
+  // const queryClient  = useQueryClient()
   const [showMembers, setShowMembers] = useState(false)
   const handleMembersUpdate = () => {
     queryClient.invalidateQueries({ queryKey: ['project', id] })
