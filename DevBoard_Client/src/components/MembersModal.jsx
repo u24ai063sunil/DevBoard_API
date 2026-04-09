@@ -9,27 +9,22 @@ const roleColors = {
 }
 
 const MembersModal = ({ project, onClose, onUpdate }) => {
-  const [email,         setEmail]         = useState('')
-  const [role,          setRole]           = useState('viewer')
-  const [searchResult,  setSearchResult]  = useState(null)
-  const [searchError,   setSearchError]   = useState('')
-  const [searching,     setSearching]     = useState(false)
-  const [adding,        setAdding]        = useState(false)
-  const [removingId,    setRemovingId]    = useState(null)
-  const [successMsg,    setSuccessMsg]    = useState('')
+  const [email,        setEmail]        = useState('')
+  const [role,         setRole]         = useState('viewer')
+  const [searchResult, setSearchResult] = useState(null)
+  const [searchError,  setSearchError]  = useState('')
+  const [searching,    setSearching]    = useState(false)
+  const [adding,       setAdding]       = useState(false)
+  const [removingId,   setRemovingId]   = useState(null)
+  const [successMsg,   setSuccessMsg]   = useState('')
 
-  const isOwner = project.owner._id === project.owner._id // always true — check in render
-
-  // ── Search user by email ──────────────────────────────────────
   const handleSearch = async (e) => {
     e.preventDefault()
     if (!email.trim()) return
-
     setSearching(true)
     setSearchError('')
     setSearchResult(null)
     setSuccessMsg('')
-
     try {
       const res = await api.get(`/users/search?email=${email.trim()}`)
       setSearchResult(res.data.data)
@@ -40,12 +35,10 @@ const MembersModal = ({ project, onClose, onUpdate }) => {
     }
   }
 
-  // ── Add member ────────────────────────────────────────────────
   const handleAdd = async () => {
     if (!searchResult) return
     setAdding(true)
     setSuccessMsg('')
-
     try {
       await api.post(`/projects/${project._id}/members`, {
         userId: searchResult._id,
@@ -54,7 +47,7 @@ const MembersModal = ({ project, onClose, onUpdate }) => {
       setSuccessMsg(`${searchResult.name} added as ${role}!`)
       setSearchResult(null)
       setEmail('')
-      onUpdate() // refetch project
+      onUpdate()
     } catch (err) {
       setSearchError(err.response?.data?.message || 'Failed to add member')
     } finally {
@@ -62,15 +55,13 @@ const MembersModal = ({ project, onClose, onUpdate }) => {
     }
   }
 
-  // ── Remove member ─────────────────────────────────────────────
   const handleRemove = async (userId, userName) => {
     if (!window.confirm(`Remove ${userName} from this project?`)) return
     setRemovingId(userId)
-
     try {
       await api.delete(`/projects/${project._id}/members/${userId}`)
       setSuccessMsg(`${userName} removed from project`)
-      onUpdate() // refetch project
+      onUpdate()
     } catch (err) {
       setSearchError(err.response?.data?.message || 'Failed to remove member')
     } finally {
@@ -93,22 +84,18 @@ const MembersModal = ({ project, onClose, onUpdate }) => {
             <h2 className="text-white font-semibold text-lg">Team Members</h2>
             <p className="text-gray-400 text-sm">{project.name}</p>
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-white text-2xl leading-none">
-            ×
-          </button>
+          <button onClick={onClose} className="text-gray-500 hover:text-white text-2xl leading-none">x</button>
         </div>
 
-        {/* Success message */}
         {successMsg && (
           <div className="bg-green-500/10 border border-green-500/30 text-green-400 text-sm rounded-lg px-4 py-3 mb-4">
             {successMsg}
           </div>
         )}
 
-        {/* ── Add member section ──────────────────────────── */}
+        {/* Add member */}
         <div className="bg-gray-800 rounded-xl p-4 mb-6">
           <h3 className="text-white text-sm font-medium mb-3">Add Member</h3>
-
           <form onSubmit={handleSearch} className="flex gap-2 mb-3">
             <input
               type="email"
@@ -126,24 +113,17 @@ const MembersModal = ({ project, onClose, onUpdate }) => {
             </button>
           </form>
 
-          {/* Search error */}
-          {searchError && (
-            <p className="text-red-400 text-xs mb-3">{searchError}</p>
-          )}
+          {searchError && <p className="text-red-400 text-xs mb-3">{searchError}</p>}
 
-          {/* Search result */}
           {searchResult && (
             <div className="bg-gray-700 rounded-lg p-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {/* Avatar */}
                 <UserAvatar user={searchResult} size="md" showOnline={true} />
                 <div>
                   <p className="text-white text-sm font-medium">{searchResult.name}</p>
                   <p className="text-gray-400 text-xs">{searchResult.email}</p>
                 </div>
               </div>
-
-              {/* Role selector + Add button */}
               <div className="flex items-center gap-2">
                 <select
                   value={role}
@@ -166,7 +146,7 @@ const MembersModal = ({ project, onClose, onUpdate }) => {
           )}
         </div>
 
-        {/* ── Current members list ────────────────────────── */}
+        {/* Current members */}
         <div>
           <h3 className="text-white text-sm font-medium mb-3">
             Current Members ({project.members.length + 1})
@@ -177,9 +157,7 @@ const MembersModal = ({ project, onClose, onUpdate }) => {
             {/* Owner */}
             <div className="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center overflow-hidden shrink-0">
-                  <UserAvatar user={project.owner} size="md" showOnline={true} />
-                </div>
+                <UserAvatar user={project.owner} size="md" showOnline={true} />
                 <div>
                   <p className="text-white text-sm font-medium">{project.owner.name}</p>
                   <p className="text-gray-400 text-xs">{project.owner.email}</p>
@@ -202,15 +180,12 @@ const MembersModal = ({ project, onClose, onUpdate }) => {
                   className="flex items-center justify-between p-3 bg-gray-800 rounded-lg"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gray-600 flex items-center justify-center overflow-hidden shrink-0">
-                      <UserAvatar user={member.user} size="md" showOnline={true} />
-                    </div>
+                    <UserAvatar user={member.user} size="md" showOnline={true} />
                     <div>
                       <p className="text-white text-sm font-medium">{member.user.name}</p>
                       <p className="text-gray-400 text-xs">{member.user.email}</p>
                     </div>
                   </div>
-
                   <div className="flex items-center gap-2">
                     <span className={`text-xs px-2 py-1 rounded-full ${roleColors[member.role]}`}>
                       {member.role}
@@ -220,7 +195,7 @@ const MembersModal = ({ project, onClose, onUpdate }) => {
                       disabled={removingId === member.user._id}
                       className="text-gray-500 hover:text-red-400 transition text-lg leading-none"
                     >
-                      ×
+                      x
                     </button>
                   </div>
                 </div>
@@ -228,7 +203,6 @@ const MembersModal = ({ project, onClose, onUpdate }) => {
             )}
           </div>
         </div>
-
       </div>
     </div>
   )
