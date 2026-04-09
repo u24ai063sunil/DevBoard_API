@@ -2,7 +2,8 @@ import usePresenceStore from '../store/presenceStore'
 
 const OnlineDot = ({ userId, size = 'sm' }) => {
   const onlineUsers = usePresenceStore((s) => s.onlineUsers)
-  const online      = onlineUsers.has(userId)
+  const id     = typeof userId === 'object' ? userId?._id || userId?.id : userId
+  const online = id ? onlineUsers.has(id.toString()) : false
 
   const sizes = {
     xs: 'w-1.5 h-1.5',

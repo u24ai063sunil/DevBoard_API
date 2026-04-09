@@ -9,9 +9,9 @@ import api from '../api/axios'
 let socketInstance = null
 
 export const useSocket = () => {
-  const { isAuthenticated }   = useAuthStore()
-  const addNotification       = useNotificationStore((s) => s.addNotification)
-  const queryClient           = useQueryClient()
+  const { isAuthenticated } = useAuthStore()
+  const addNotification = useNotificationStore((s) => s.addNotification)
+  const queryClient = useQueryClient()
   const { setOnline, setOffline, setMultipleOnline } = usePresenceStore()
 
   useEffect(() => {
@@ -20,15 +20,18 @@ export const useSocket = () => {
     const token = localStorage.getItem('accessToken')
     if (!token) return
 
+    // ✅ Prevent multiple connections
+    if (socketInstance) return
+
     socketInstance = io('http://localhost:5000', {
       auth: { token },
-      transports: ['websocket'],
+      withCredentials: true,
     })
 
+    // ✅ Connected
     socketInstance.on('connect', async () => {
       console.log('Socket connected:', socketInstance.id)
 
-      // Fetch currently online users on connect
       try {
         const res = await api.get('/users/online')
         setMultipleOnline(res.data.data)
@@ -37,42 +40,45 @@ export const useSocket = () => {
       }
     })
 
-    // Someone came online
+    // ✅ Presence updates
     socketInstance.on('user:online', ({ userId }) => {
       setOnline(userId)
     })
 
-    // Someone went offline
     socketInstance.on('user:offline', ({ userId }) => {
       setOffline(userId)
     })
 
-    // Personal notifications
+    // ✅ Notifications
     socketInstance.on('notification', (notification) => {
       addNotification(notification)
     })
 
-    // Project updates
+    // ✅ Project updates
     socketInstance.on('project:update', (update) => {
       const projectId = update.data?.projectId
+
       if (projectId) {
         queryClient.invalidateQueries({ queryKey: ['tasks', projectId] })
         queryClient.invalidateQueries({ queryKey: ['project', projectId] })
       }
+
       if (update.type === 'task:completed') {
         addNotification({
-          type:      update.type,
-          data:      update.data,
+          type: update.type,
+          data: update.data,
           timestamp: update.timestamp,
-          read:      false,
+          read: false,
         })
       }
     })
 
+    // ✅ Disconnect
     socketInstance.on('disconnect', () => {
       console.log('Socket disconnected')
     })
 
+    // ✅ Error handling
     socketInstance.on('connect_error', (err) => {
       console.error('Socket error:', err.message)
     })
@@ -88,6 +94,13 @@ export const useSocket = () => {
   return socketInstance
 }
 
-export const joinProjectRoom  = (projectId) => socketInstance?.emit('join:project', projectId)
-export const leaveProjectRoom = (projectId) => socketInstance?.emit('leave:project', projectId)
-export const getSocket        = () => socketInstance
+// ✅ Utility functions
+export const joinProjectRoom = (projectId) => {
+  socketInstance?.emit('join:project', projectId)
+}
+
+export const leaveProjectRoom = (projectId) => {
+  socketInstance?.emit('leave:project', projectId)
+}
+
+export const getSocket = () => socketInstance

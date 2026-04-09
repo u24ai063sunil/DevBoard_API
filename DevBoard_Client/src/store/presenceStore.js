@@ -1,12 +1,12 @@
 import { create } from 'zustand'
 
-const usePresenceStore = create((set) => ({
+const usePresenceStore = create((set, get) => ({
   onlineUsers: new Set(),
 
   setOnline: (userId) => {
     set((state) => {
       const updated = new Set(state.onlineUsers)
-      updated.add(userId)
+      updated.add(userId.toString())
       return { onlineUsers: updated }
     })
   },
@@ -14,18 +14,17 @@ const usePresenceStore = create((set) => ({
   setOffline: (userId) => {
     set((state) => {
       const updated = new Set(state.onlineUsers)
-      updated.delete(userId)
+      updated.delete(userId.toString())
       return { onlineUsers: updated }
     })
   },
 
   setMultipleOnline: (userIds) => {
-    set({ onlineUsers: new Set(userIds) })
+    set({ onlineUsers: new Set(userIds.map((id) => id.toString())) })
   },
 
   isOnline: (userId) => {
-    // called outside component — use getState
-    return usePresenceStore.getState().onlineUsers.has(userId)
+    return get().onlineUsers.has(userId?.toString())
   },
 }))
 

@@ -8,7 +8,7 @@ const UserAvatar = ({ user, size = 'md', showOnline = true }) => {
   }
 
   const s = sizes[size] || sizes.md
-
+  const userId = user?._id || user?.id
   return (
     <div className="relative inline-flex shrink-0">
       <div className={`${s.outer} rounded-full overflow-hidden bg-indigo-600 flex items-center justify-center`}>
@@ -21,9 +21,9 @@ const UserAvatar = ({ user, size = 'md', showOnline = true }) => {
         )}
       </div>
 
-      {showOnline && user?._id && (
+      {showOnline && userId && (
         <span className="absolute -bottom-0.5 -right-0.5">
-          <OnlineDot userId={user._id} size={s.dot} />
+          <OnlineDot userId={userId} size={s.dot} />
         </span>
       )}
     </div>
