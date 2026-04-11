@@ -14,6 +14,9 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const userRoutes = require('./routes/userRoutes')
 const analyticsRoutes = require('./routes/analyticsRoutes')
+const session       = require('express-session')
+const passport      = require('./config/passport')
+const googleAuthRoutes = require('./routes/googleAuthRoutes')
 
 const app = express();
 
@@ -47,6 +50,14 @@ app.use(cookieParser());           // parse cookies (needed for refresh tokens)
 // ── HTTP request logging ──────────────────────────────────────────
 // Morgan logs: GET /api/users 200 12ms
 app.use(morgan('dev'));
+app.use(session({
+  secret:            process.env.SESSION_SECRET,
+  resave:            false,
+  saveUninitialized: false,
+  cookie:            { secure: false }, // true in production with HTTPS
+}))
+app.use(passport.initialize())
+app.use(passport.session())
 
 // ── Routes ────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
@@ -57,6 +68,7 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customCss: '.swagger-ui .topbar { display: none }', // hide default swagger header
 }));
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', googleAuthRoutes)
 // (More routes added in later phases)
 app.use('/api/projects', projectRoutes);
 app.use('/api/projects/:projectId/tasks', taskRoutes); // nested route

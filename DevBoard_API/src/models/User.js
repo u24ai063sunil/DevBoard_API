@@ -18,12 +18,12 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email'],
     },
-    password: {
-      type: String,
-      required: [true, 'Password is required'],
-      minlength: [8, 'Password must be at least 8 characters'],
-      select: false,        // NEVER include password in query results by default
-    },
+    // password: {
+    //   type: String,
+    //   required: [true, 'Password is required'],
+    //   minlength: [8, 'Password must be at least 8 characters'],
+    //   select: false,        // NEVER include password in query results by default
+    // },
     role: {
       type: String,
       enum: ['user', 'admin'], // RBAC — only these two values allowed
@@ -36,6 +36,16 @@ const userSchema = new mongoose.Schema(
     isVerified: {
       type: Boolean,
       default: false,
+    },
+    googleId: {
+      type:   String,
+      sparse: true, // allows null but unique when present
+    },
+    password: {
+      type: String,
+      required: [function() { return !this.googleId; }, 'Password is required'],
+      minlength: [8, 'Password must be at least 8 characters'],
+      select: false,
     },
     emailVerificationToken:   String,
     emailVerificationExpires: Date,
@@ -82,7 +92,12 @@ userSchema.methods.createEmailVerificationToken = function () {
 
 // ── Pre-save hook: hash password before saving ──────────────────────
 userSchema.pre('save', async function () {
-  if (!this.isModified('password')) return;
+  // Skip if password not modified or not set (Google users)
+  if (!this.isModified('password') || !this.password) return;
+
+  // Skip if already hashed (starts with $2b$ = bcrypt hash)
+  if (this.password.startsWith('$2b$')) return;
+
   this.password = await bcrypt.hash(this.password, 12);
 });
 

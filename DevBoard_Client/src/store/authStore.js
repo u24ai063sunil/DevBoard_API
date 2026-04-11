@@ -44,7 +44,17 @@ const useAuthStore = create(
         })
         return res.data
       },
-
+      setGoogleUser: (userData, token) => {
+        set({
+          user: {
+            ...userData,
+            id:  userData._id || userData.id,
+            _id: userData._id || userData.id,
+          },
+          token,
+          isAuthenticated: true,
+        })
+      },
       logout: async () => {
         await api.post('/auth/logout')
         localStorage.removeItem('accessToken')

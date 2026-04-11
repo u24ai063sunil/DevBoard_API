@@ -17,14 +17,21 @@ const register = catchAsync(async (req, res, next) => {
   const existingUser = await User.findOne({ email })
   if (existingUser) return next(new AppError('Email already in use', 409))
 
-  const user = await User.create({ name, email, password })
 
-  // Generate verification token
-  const verifyToken = user.createEmailVerificationToken()
-  await user.save({ validateBeforeSave: false })
+
+  // Create user (password will be hashed by pre-save hook)
+  const user = await User.create({ name, email, password });
+
+  // Generate and set verification token after creation
+  const verifyToken = crypto.randomBytes(32).toString('hex');
+  const hashedToken = crypto.createHash('sha256').update(verifyToken).digest('hex');
+  await User.findByIdAndUpdate(user._id, {
+    emailVerificationToken: hashedToken,
+    emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000
+  });
 
   // Only send verification email — welcome email comes after verification
-  await addVerificationEmailJob({ to: email, name, verifyToken })
+  await addVerificationEmailJob({ to: email, name, verifyToken });
 
   res.status(201).json({
     success: true,
@@ -44,11 +51,19 @@ const login = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ email }).select('+password')
 
-  if (!user || !(await user.comparePassword(password))) {
+  if (!user) {
     return next(new AppError('Invalid email or password', 401))
   }
 
-  // Block login if not verified
+  // Google-only user trying to use password login
+  if (!user.password && user.googleId) {
+    return next(new AppError('This account uses Google Sign In. Please click "Continue with Google".', 401))
+  }
+
+  if (!(await user.comparePassword(password))) {
+    return next(new AppError('Invalid email or password', 401))
+  }
+
   if (!user.isVerified) {
     return next(new AppError('Please verify your email before logging in.', 401))
   }
