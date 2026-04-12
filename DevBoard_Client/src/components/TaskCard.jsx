@@ -29,7 +29,7 @@ const dueDateColors = {
   normal:  'bg-gray-500/10 text-gray-400',
 }
 
-const TaskCard = ({ task, projectId }) => {
+const TaskCard = ({ task, projectId, isDragging = false}) => {
   const updateTask    = useUpdateTask(projectId)
   const deleteTask    = useDeleteTask(projectId)
   const dueDateStatus = getDueDateStatus(task.dueDate, task.status)
@@ -56,13 +56,13 @@ const TaskCard = ({ task, projectId }) => {
   }
   const [showDetail, setShowDetail] = useState(false)
   return (
-    <div className={`border rounded-xl p-4 transition-all duration-300 ${
-        justUpdated
-          ? 'bg-indigo-500/10 border-indigo-500/30'
-          : dueDateStatus?.type === 'overdue'
-            ? 'bg-gray-900 border-red-500/30 hover:border-red-500/50'
-            : 'bg-gray-900 border-gray-800 hover:border-gray-700'
-      }`}>
+    <div className={`border rounded-xl p-4 transition-all duration-200 ${
+      isDragging
+        ? 'bg-gray-800 border-indigo-500/50 shadow-lg shadow-indigo-500/10'
+        : dueDateStatus?.type === 'overdue'
+          ? 'bg-gray-900 border-red-500/30 hover:border-red-500/50'
+          : 'bg-gray-900 border-gray-800 hover:border-gray-700'
+    }`}>
 
       {/* Header */}
       <div className="flex justify-between items-start gap-2 mb-2">

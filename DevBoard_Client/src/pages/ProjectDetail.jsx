@@ -12,7 +12,7 @@ import { useEffect } from 'react'
 import { joinProjectRoom, leaveProjectRoom, getSocket } from '../socket/useSocket'
 import UserAvatar from '../components/UserAvatar'
 import usePresenceStore from '../store/presenceStore'
-
+import KanbanBoard from '../components/KanbanBoard'
 const statusColumns = ['todo', 'in-progress', 'in-review', 'done']
 const columnLabels  = { 'todo': 'Todo', 'in-progress': 'In Progress', 'in-review': 'In Review', 'done': 'Done' }
 const columnColors  = { 'todo': 'border-gray-700', 'in-progress': 'border-blue-500/30', 'in-review': 'border-yellow-500/30', 'done': 'border-green-500/30' }
@@ -294,7 +294,7 @@ const ProjectDetail = () => {
         )}
 
         {/* Kanban board */}
-        {filteredTasks.length > 0 && (
+        {/* {filteredTasks.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {statusColumns.map((s) => (
               <div key={s} className={`bg-gray-900 border ${columnColors[s]} rounded-xl p-4`}>
@@ -313,8 +313,15 @@ const ProjectDetail = () => {
                   }
                 </div>
               </div>
-            ))}
-          </div>
+            ))} */}
+          {/* </div>
+        )} */}
+        {/* Kanban board — with drag and drop */}
+        {filteredTasks.length > 0 && (
+          <KanbanBoard
+            tasks={filteredTasks}
+            projectId={id}
+          />
         )}
 
       </main>

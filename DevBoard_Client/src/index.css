@@ -95,3 +95,10 @@ body {
 .light .bg-indigo-500 {
   background-color: #4f46e5 !important;
 }
+[data-dnd-kit-sortable-handle] {
+  touch-action: none;
+}
+
+.dragging-over {
+  background-color: rgba(99, 102, 241, 0.05);
+}
