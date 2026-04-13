@@ -10,8 +10,29 @@ import ResetPassword  from './pages/ResetPassword'
 import Analytics from './pages/Analytics'
 import AuthCallback from './pages/AuthCallback'
 import AdminDashboard from './pages/AdminDashboard'
+import { useEffect } from 'react'
+import useAuthStore from './store/authStore'
+import api from './api/axios'
 
 function App() {
+  const { isAuthenticated, updateUser } = useAuthStore()
+
+  // Sync fresh user data on app load — fixes stale avatar
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    const syncUser = async () => {
+      try {
+        const res = await api.get('/auth/me')
+        updateUser(res.data.user)
+      } catch (err) {
+        console.error('Failed to sync user:', err)
+      }
+    }
+
+    syncUser()
+  }, [isAuthenticated])
+
   return (
     <BrowserRouter>
       <Routes>
