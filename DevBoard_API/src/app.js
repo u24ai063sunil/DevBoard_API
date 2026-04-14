@@ -20,7 +20,18 @@ const googleAuthRoutes = require('./routes/googleAuthRoutes')
 const adminRoutes = require('./routes/adminRoutes')
 
 const app = express();
+const compression = require('compression')
 
+// Add as FIRST middleware — compress all responses
+app.use(compression({
+  level: 6,        // compression level 1-9 (6 = good balance)
+  threshold: 1024, // only compress responses larger than 1KB
+  filter: (req, res) => {
+    // Don't compress if client doesn't support it
+    if (req.headers['x-no-compression']) return false
+    return compression.filter(req, res)
+  },
+}))
 // ── Security middleware ──────────────────────────────────────────
 // helmet sets secure HTTP headers (prevents XSS, clickjacking etc.)
 app.use(helmet());

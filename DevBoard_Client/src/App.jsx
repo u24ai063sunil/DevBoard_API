@@ -13,6 +13,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import { useEffect } from 'react'
 import useAuthStore from './store/authStore'
 import api from './api/axios'
+import Footer from './components/Footer'
 
 function App() {
   const { isAuthenticated, updateUser } = useAuthStore()
@@ -35,6 +36,7 @@ function App() {
 
   return (
     <BrowserRouter>
+     <div className="min-h-screen flex flex-col">
       <Routes>
         <Route path="/login"    element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -60,6 +62,8 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password"  element={<ResetPassword />} />
       </Routes>
+      <Footer />
+      </div>
     </BrowserRouter>
   )
 }
